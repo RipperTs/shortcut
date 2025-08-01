@@ -23,3 +23,11 @@ common:
 cache:
   # Redis缓存key前缀，默认为 shortcut_
   prefix: shortcut_
+
+# 安全配置
+security:
+  # 转换密码列表，如果配置了密码则前端转换时需要提供密码
+  # 支持多个密码
+  passwords: 
+    - admin123
+    - convert2024

@@ -6,315 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="../static/favicon.ico" th:href="@{/static/favicon.ico}"/>
     <title>短地址转换工具</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .header h1 {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .header p {
-            color: rgba(255,255,255,0.8);
-            font-size: 1.1rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            color: #333;
-            margin-bottom: 20px;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-container {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            min-width: 300px;
-            padding: 14px 18px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 140px;
-            justify-content: center;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
-        }
-
-        .result-container {
-            margin-top: 25px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-            display: none;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .result-container.show {
-            display: block;
-        }
-
-        .result-link {
-            display: block;
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 15px;
-            word-break: break-all;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e1e5e9;
-            transition: all 0.2s ease;
-        }
-
-        .result-link:hover {
-            background: #667eea;
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .qr-container {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .qr-container img {
-            max-width: 150px;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        .loading.show {
-            display: block;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            color: rgba(255,255,255,0.7);
-            font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px 10px;
-            }
-            
-            .card {
-                padding: 25px 20px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .input-container {
-                flex-direction: column;
-            }
-            
-            input[type="text"] {
-                min-width: auto;
-                width: 100%;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-        }
-
-        .icon {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
-
-        /* Tab样式 */
-        .tabs-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .tabs-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
-        }
-
-        .tab-header {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e1e5e9;
-        }
-
-        .tab-button {
-            flex: 1;
-            padding: 20px;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            font-weight: 600;
-            color: #666;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .tab-button:hover {
-            color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
-        }
-
-        .tab-button.active {
-            color: #667eea;
-            background: white;
-        }
-
-        .tab-button.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .tab-content {
-            display: none;
-            padding: 40px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../static/css/global.css" th:href="@{/css/global.css}">
 </head>
 <body>
     <div class="container">
@@ -342,6 +34,18 @@
                 <div class="input-group">
                     <div class="input-container">
                         <input type="text" id="url" placeholder="请输入要转换的长网址..." />
+                    </div>
+                    <div class="input-container password-container" id="passwordContainer">
+                        <div class="password-wrapper">
+                            <svg class="password-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <circle cx="12" cy="16" r="1"></circle>
+                                <path d="m7 11 0-4a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <input type="password" id="password" placeholder="请输入转换密码..." />
+                        </div>
+                    </div>
+                    <div class="input-container">
                         <button class="btn btn-primary" onclick="convert()">
                             <svg class="icon" viewBox="0 0 24 24">
                                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -349,15 +53,26 @@
                             转换
                         </button>
                     </div>
-                    <div class="loading" id="convertLoading">正在转换中...</div>
+                    <div class="loading" id="convertLoading">
+                        <div class="loading-spinner"></div>
+                        正在转换中...
+                    </div>
                 </div>
                 
                 <div class="result-container" id="convertResult">
-                    <div><strong>短网址：</strong></div>
-                    <a id="convertRepo" class="result-link" target="_blank"></a>
+                    <div style="margin-bottom: 16px; font-weight: 600; color: #374151;">✨ 短网址：</div>
+                    <div class="result-link" id="convertRepo">
+                        <span class="result-url" style="flex: 1;"></span>
+                        <button class="copy-btn" onclick="copyResult('convertRepo')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="m5 15-4-4 4-4m4 4h11"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="qr-container" id="convertImageDiv">
-                        <div style="margin-bottom: 10px; color: #666; font-size: 14px;">扫码访问</div>
-                        <img id="convertImage" src="" alt="二维码"/>
+                        <div style="margin-bottom: 12px; color: #6b7280; font-size: 14px; font-weight: 500;">📱 扫码访问</div>
+                        <img id="convertImage" src="" alt="二维码" style="border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);"/>
                     </div>
                 </div>
             </div>
@@ -374,311 +89,36 @@
                             还原
                         </button>
                     </div>
-                    <div class="loading" id="revertLoading">正在还原中...</div>
+                    <div class="loading" id="revertLoading">
+                        <div class="loading-spinner"></div>
+                        正在还原中...
+                    </div>
                 </div>
                 
                 <div class="result-container" id="revertResult">
-                    <div><strong>原始网址：</strong></div>
-                    <a id="revertRepo" class="result-link" target="_blank"></a>
+                    <div style="margin-bottom: 16px; font-weight: 600; color: #374151;">🔓 原始网址：</div>
+                    <div class="result-link" id="revertRepo">
+                        <span class="result-url" style="flex: 1;"></span>
+                        <button class="copy-btn" onclick="copyResult('revertRepo')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="m5 15-4-4 4-4m4 4h11"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="qr-container" id="revertImageDiv">
-                        <div style="margin-bottom: 10px; color: #666; font-size: 14px;">扫码访问</div>
-                        <img id="revertImage" src="" alt="二维码"/>
+                        <div style="margin-bottom: 12px; color: #6b7280; font-size: 14px; font-weight: 500;">📱 扫码访问</div>
+                        <img id="revertImage" src="" alt="二维码" style="border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);"/>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            <p>© 2024 短网址转换工具 - 简单、快速、安全</p>
+            <p>© 2025 短网址转换工具 - 简单、快速、安全</p>
         </div>
     </div>
 
+    <script src="../static/js/main.js" th:src="@{/js/main.js}"></script>
 </body>
-<script>
-    // Tab切换功能
-    function switchTab(tabName) {
-        // 移除所有tab按钮的active类
-        const tabButtons = document.querySelectorAll('.tab-button');
-        tabButtons.forEach(button => button.classList.remove('active'));
-        
-        // 隐藏所有tab内容
-        const tabContents = document.querySelectorAll('.tab-content');
-        tabContents.forEach(content => content.classList.remove('active'));
-        
-        // 激活当前tab按钮和内容
-        event.target.classList.add('active');
-        document.getElementById(tabName + 'Tab').classList.add('active');
-        
-        // 清空结果显示
-        hideResult('convertResult');
-        hideResult('revertResult');
-    }
-
-    // 显示加载状态
-    function showLoading(elementId) {
-        document.getElementById(elementId).classList.add('show');
-    }
-
-    // 隐藏加载状态
-    function hideLoading(elementId) {
-        document.getElementById(elementId).classList.remove('show');
-    }
-
-    // 显示结果
-    function showResult(elementId) {
-        var element = document.getElementById(elementId);
-        element.style.display = 'block';
-        element.classList.add('show');
-    }
-
-    // 隐藏结果
-    function hideResult(elementId) {
-        document.getElementById(elementId).classList.remove('show');
-        document.getElementById(elementId).style.display = 'none';
-    }
-
-    // 显示错误提示
-    function showError(message) {
-        // 创建错误提示元素
-        var errorDiv = document.createElement('div');
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #ff4757;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
-            z-index: 1000;
-            animation: slideInRight 0.3s ease;
-        `;
-        errorDiv.textContent = message;
-        
-        // 添加动画样式
-        var style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        document.body.appendChild(errorDiv);
-        
-        // 3秒后自动移除
-        setTimeout(function() {
-            if (errorDiv.parentNode) {
-                errorDiv.parentNode.removeChild(errorDiv);
-            }
-        }, 3000);
-    }
-
-    // URL转换为短地址
-    function convert() {
-        var urlInput = document.getElementById("url");
-        var url = urlInput.value.trim();
-        
-        if (!url) {
-            showError('请输入要转换的网址');
-            urlInput.focus();
-            return;
-        }
-
-        // 简单的URL格式验证
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            showError('请输入有效的网址（需要包含 http:// 或 https://）');
-            urlInput.focus();
-            return;
-        }
-
-        hideResult('convertResult');
-        showLoading('convertLoading');
-
-        var xhr = new XMLHttpRequest();
-        // Base64编码URL
-        var encodedUrl = btoa(encodeURIComponent(url));
-
-        xhr.open('post', '/convert', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        
-        xhr.onload = function () {
-            hideLoading('convertLoading');
-            
-            if (this.status === 200) {
-                try {
-                    var res = JSON.parse(this.response);
-                    
-                    if (res.code !== 200) {
-                        showError(res.message || '转换失败，请重试');
-                        return;
-                    }
-
-                    // 构建短地址URL
-                    var shortUrl = document.getElementById("preurl").innerText + "/" + res.data;
-                    
-                    // 更新结果显示
-                    var convertRepo = document.getElementById("convertRepo");
-                    convertRepo.setAttribute("href", shortUrl);
-                    convertRepo.textContent = shortUrl;
-                    
-                    // 更新二维码
-                    var convertImage = document.getElementById("convertImage");
-                    convertImage.setAttribute("src", "/qrcode?url=" + encodeURIComponent(shortUrl));
-                    
-                    // 显示结果
-                    showResult('convertResult');
-                    
-                } catch (e) {
-                    showError('服务器响应格式错误');
-                }
-            } else {
-                showError('网络请求失败，请检查网络连接');
-            }
-        };
-
-        xhr.onerror = function() {
-            hideLoading('convertLoading');
-            showError('网络连接失败，请重试');
-        };
-
-        xhr.send('url=' + encodedUrl);
-    }
-
-    // 短地址还原
-    function revert() {
-        var shortUrlInput = document.getElementById("shortUrl");
-        var shortUrl = shortUrlInput.value.trim();
-        
-        if (!shortUrl) {
-            showError('请输入要还原的短网址');
-            shortUrlInput.focus();
-            return;
-        }
-
-        hideResult('revertResult');
-        showLoading('revertLoading');
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('post', '/revert', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        
-        xhr.onload = function () {
-            hideLoading('revertLoading');
-            
-            if (this.status === 200) {
-                try {
-                    var res = JSON.parse(this.response);
-                    
-                    if (res.code !== 200) {
-                        showError(res.message || '还原失败，请检查短网址是否正确');
-                        return;
-                    }
-
-                    if (!res.data) {
-                        showError('未找到对应的原始网址');
-                        return;
-                    }
-
-                    // 更新结果显示
-                    var revertRepo = document.getElementById("revertRepo");
-                    revertRepo.setAttribute("href", res.data);
-                    revertRepo.textContent = res.data;
-                    
-                    // 更新二维码
-                    var revertImage = document.getElementById("revertImage");
-                    revertImage.setAttribute("src", "/qrcode?url=" + encodeURIComponent(res.data));
-                    
-                    // 显示结果
-                    showResult('revertResult');
-                    
-                } catch (e) {
-                    showError('服务器响应格式错误');
-                }
-            } else {
-                showError('网络请求失败，请检查网络连接');
-            }
-        };
-
-        xhr.onerror = function() {
-            hideLoading('revertLoading');
-            showError('网络连接失败，请重试');
-        };
-
-        xhr.send('shortUrl=' + shortUrl);
-    }
-
-    // 添加回车键支持
-    document.getElementById('url').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            convert();
-        }
-    });
-
-    document.getElementById('shortUrl').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            revert();
-        }
-    });
-
-    // 添加复制功能
-    function copyToClipboard(text) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text).then(function() {
-                showSuccess('已复制到剪贴板');
-            });
-        } else {
-            // 兼容旧浏览器
-            var textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            showSuccess('已复制到剪贴板');
-        }
-    }
-
-    // 显示成功提示
-    function showSuccess(message) {
-        var successDiv = document.createElement('div');
-        successDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #2ed573;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(46, 213, 115, 0.3);
-            z-index: 1000;
-            animation: slideInRight 0.3s ease;
-        `;
-        successDiv.textContent = message;
-        document.body.appendChild(successDiv);
-        
-        setTimeout(function() {
-            if (successDiv.parentNode) {
-                successDiv.parentNode.removeChild(successDiv);
-            }
-        }, 2000);
-    }
-
-    // 为结果链接添加点击复制功能
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('result-link')) {
-            e.preventDefault();
-            copyToClipboard(e.target.textContent);
-            
-            // 如果是链接地址，也可以选择打开链接
-            setTimeout(function() {
-                if (confirm('是否要在新窗口中打开这个链接？')) {
-                    window.open(e.target.href, '_blank');
-                }
-            }, 500);
-        }
-    });
-
-</script>
 </html>
