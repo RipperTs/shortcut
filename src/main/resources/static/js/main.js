@@ -157,20 +157,22 @@ function convert() {
     // Base64编码URL
     var encodedUrl = btoa(encodeURIComponent(url));
 
-    // 准备请求数据
-    var requestData = 'url=' + encodedUrl;
+    // 准备JSON请求数据
+    var requestData = {
+        url: encodedUrl
+    };
 
     // 如果密码输入框可见，则添加密码参数
     var passwordContainer = document.getElementById('passwordContainer');
     if (passwordContainer.classList.contains('show')) {
         var password = document.getElementById('password').value.trim();
         if (password) {
-            requestData += '&password=' + encodeURIComponent(password);
+            requestData.password = password;
         }
     }
 
     xhr.open('post', '/convert', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
     xhr.onload = function () {
         hideLoading('convertLoading');
@@ -226,7 +228,7 @@ function convert() {
         showError('网络连接失败，请重试');
     };
 
-    xhr.send(requestData);
+    xhr.send(JSON.stringify(requestData));
 }
 
 // 短地址还原
@@ -245,7 +247,7 @@ function revert() {
 
     var xhr = new XMLHttpRequest();
     xhr.open('post', '/revert', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
     xhr.onload = function () {
         hideLoading('revertLoading');
@@ -290,7 +292,7 @@ function revert() {
         showError('网络连接失败，请重试');
     };
 
-    xhr.send('shortUrl=' + shortUrl);
+    xhr.send(JSON.stringify({shortUrl: shortUrl}));
 }
 
 // 页面加载完成后检查密码配置
