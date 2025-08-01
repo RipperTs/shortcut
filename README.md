@@ -75,6 +75,9 @@ mvn spring-boot:run
 - 🌐 **自定义域名**: 支持配置自定义短地址域名
 - 🎨 **Web界面**: 现代化的前端界面，支持加载指示器
 - 🔄 **反向查询**: 支持通过短地址查询原始URL
+- 🗑️ **删除功能**: 支持删除已创建的短地址
+- 🌍 **跨域支持**: 内置CORS配置，支持跨域请求
+- 📄 **错误处理**: 自定义404错误页面和全局异常处理
 - ⚡ **高性能**: QPS 可达 4000+
 - 🛡️ **异常处理**: 全局异常拦截和处理
 - ✔️ **URL校验**: 完善的URL格式验证
@@ -188,9 +191,12 @@ cache:
 ### 1. URL转换
 ```http
 POST /convert
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 
-url=aHR0cHM6Ly9leGFtcGxlLmNvbQ==&password=admin123
+{
+  "url": "aHR0cHM6Ly9leGFtcGxlLmNvbQ==",
+  "password": "admin123"
+}
 ```
 
 **注意**: `url` 参数必须是经过 **base64编码** 的URL字符串。
@@ -206,33 +212,41 @@ const encodedUrl = btoa(encodeURIComponent(originalUrl));
 ### 2. 短地址反查
 ```http
 POST /revert
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 
-shortUrl=7TDp0rS917i
+{
+  "shortUrl": "7TDp0rS917i"
+}
 ```
 
 **返回**: 解码后的原始URL
 
-### 3. 二维码生成
+### 3. 删除短地址
+```http
+POST /delete
+Content-Type: application/json
+
+{
+  "shortUrl": "7TDp0rS917i"
+}
+```
+
+**返回**: `{"code":200,"message":"SUCCESS","data":true}`
+
+### 4. 二维码生成
 ```http
 GET /qrcode?url=https://example.com
 ```
 
 **注意**: 二维码接口可以直接使用原始URL，无需base64编码。
 
-### 4. 检查密码验证状态
+### 5. 检查密码验证状态
 ```http
 GET /password-enabled
 ```
 
 **返回**: `{"code":200,"message":"SUCCESS","data":true}`
 
-## 性能测试
-
-使用 JMH 进行性能基准测试，测试环境：
-- **CPU**: 2.2 GHz Intel Core i7
-- **内存**: 16 GB
-- **操作系统**: macOS
 
 ### 测试配置
 ```java
@@ -405,7 +419,14 @@ cache:
 
 ## 更新日志
 
-### v2.0.0 (最新)
+### v2.1.0 (最新)
+- ✨ 新增短地址删除功能
+- ✨ 新增CORS跨域支持
+- ✨ 新增自定义404错误页面
+- 🔧 重构API接口，统一使用JSON请求体
+- 🎨 完善全局异常处理机制
+
+### v2.0.0
 - ✨ 新增密码保护功能
 - ✨ 新增短地址反向查询接口
 - ✨ 新增缓存前缀配置
