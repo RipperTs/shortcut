@@ -62,6 +62,9 @@ mvn spring-boot:run
 - **Web 界面**: http://127.0.0.1:9527/
 - **API 接口**: http://127.0.0.1:9527/convert
 
+### 5. 主页面
+![main.png](docs/main.png)
+
 ## 功能特性
 
 ### ✅ 已实现功能
