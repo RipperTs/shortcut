@@ -1,130 +1,313 @@
 <h1 align="center">
   <br>
-  shortcut
+  Shortcut
   <h4 align="center">
-shortCut 是一个短地址生成工具，基于 twitter 的雪花算法，给新增的转换请求发号，得到新的短地址。
+基于 Spring Boot 的高性能短地址生成服务，使用 Twitter 雪花算法生成唯一短地址，支持密码保护和二维码生成。
   </h4>
   <h5 align="center">
-<a href="#Environment">Environment</a>&nbsp;&nbsp;
-<a href="#quick-start">Quick Start</a>&nbsp;&nbsp;
-<a href="#Features">Features</a>&nbsp;&nbsp;
-<a href="#Structure">Structure</a>&nbsp;&nbsp;
-<a href="#Thanks">Thanks</a>&nbsp;&nbsp;
-<a href="#License">License</a>
+<a href="#环境要求">环境要求</a>&nbsp;&nbsp;
+<a href="#快速开始">快速开始</a>&nbsp;&nbsp;
+<a href="#功能特性">功能特性</a>&nbsp;&nbsp;
+<a href="#配置说明">配置说明</a>&nbsp;&nbsp;
+<a href="#架构设计">架构设计</a>&nbsp;&nbsp;
+<a href="#性能测试">性能测试</a>&nbsp;&nbsp;
+<a href="#致谢">致谢</a>&nbsp;&nbsp;
+<a href="#许可证">许可证</a>
 </h5>
   <br>
 </h1>
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Alkaids/shortcut/build)![GitHub](https://img.shields.io/github/license/Alkaids/shortcut)![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/alkaids/shortcut)
+![GitHub](https://img.shields.io/github/license/Alkaids/shortcut)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/alkaids/shortcut)
+![Java Version](https://img.shields.io/badge/Java-8%2B-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.2.4-green)
 
-## Environment
+## 环境要求
 
-* Redis 4.0
-* Java 8 +
-* Maven 3.0 +
+* **Java**: 8+
+* **Maven**: 3.0+
+* **Redis**: 4.0+
 
-## Quick Start
+## 快速开始
 
-```
+### 1. 克隆项目
+```bash
 git clone https://github.com/Alkaids/shortcut.git
 cd shortcut
-mvn -Dmaven.test.skip=true clean package
-java -jar target/shortcut-0.0.1-SNAPSHOT.jar
 ```
 
-访问 http://127.0.0.1:9527/ 即可看到测试页面。
+### 2. 配置 Redis
+修改 `src/main/resources/application.yml` 中的 Redis 配置：
+```yaml
+spring:
+  redis:
+    host: your-redis-host
+    port: 6379
+    password: your-redis-password
+```
 
-### 自定义域名
-增加 `common.domain` 配置，实际部署的时候，可以配置短地址服务域名信息。 
+### 3. 构建运行
+```bash
+# 跳过测试构建
+mvn -Dmaven.test.skip=true clean package
 
-## Features
+# 运行应用
+java -jar target/shortcut-0.0.1-SNAPSHOT.jar
 
-- [X] 添加布隆过滤器判断 url 是否存在
-- [X] 性能测试
-- [X] 增加前端页面测试
-- [X] 全局异常拦截
-- [X] url 格式校验
-- [X] 增加<url To 二维码>转换功能
-- [X] 自定义域名配置
+# 或直接 Maven 运行
+mvn spring-boot:run
+```
+
+### 4. 访问服务
+- **Web 界面**: http://127.0.0.1:9527/
+- **API 接口**: http://127.0.0.1:9527/convert
+
+## 功能特性
+
+### ✅ 已实现功能
+- 🔗 **短地址生成**: 基于雪花算法的高性能短地址生成
+- 🔒 **密码保护**: 支持为URL转换设置密码验证
+- 📱 **二维码生成**: 自动生成对应的二维码图片
+- 🔍 **布隆过滤器**: 高效判断URL是否已存在
+- 🌐 **自定义域名**: 支持配置自定义短地址域名
+- 🎨 **Web界面**: 现代化的前端界面，支持加载指示器
+- 🔄 **反向查询**: 支持通过短地址查询原始URL
+- ⚡ **高性能**: QPS 可达 4000+
+- 🛡️ **异常处理**: 全局异常拦截和处理
+- ✔️ **URL校验**: 完善的URL格式验证
+- 🗂️ **缓存配置**: 支持自定义Redis缓存前缀
+
+### 🚧 计划功能
 - [ ] 令牌桶限流
-- [ ] url 请求统计
+- [ ] URL访问统计
+- [ ] 批量URL转换
+- [ ] 过期时间设置
 
-## Structure
+## 配置说明
 
-在知乎看到[这篇贴子](https://www.zhihu.com/question/29270034/answer/46446911)谈论短地址生成的方法。
-主要步骤为两个：
+### 基础配置
+```yaml
+# 服务端口
+server:
+  port: 9527
 
-* 实现一个不会重复的发号器
-* 每个新的请求都给它一个新的号码，转换成62进制，62进制是带有阿拉伯数字，英文大小写的格式，比较适合作为短地址的 url.
+# 自定义域名配置
+common:
+  domain: http://your-domain.com
+```
 
-#### 发号器
-直接不造轮子了，用 Twitter 的雪花算法。
+### 安全配置
+```yaml
+# 密码保护配置
+security:
+  passwords: 
+    - admin123      # 支持多个密码
+    - convert2024
+```
+
+### 缓存配置
+```yaml
+# Redis缓存配置
+cache:
+  prefix: shortcut_  # 缓存key前缀
+```
+
+## 架构设计
+
+### 核心原理
+
+参考知乎上[这篇文章](https://www.zhihu.com/question/29270034/answer/46446911)的短地址生成方法，主要包含两个步骤：
+
+1. **实现唯一ID发号器** - 使用Twitter雪花算法生成不重复的Long型ID
+2. **进制转换** - 将Long型ID转换为62进制字符串作为短地址
+
+### 雪花算法结构
 
 ```
 0 - 0000000000 0000000000 0000000000 0000000000 0 - 00000 - 00000 - 000000000000 
 ```
 
- * 1位标识，由于long基本类型在Java中是带符号的，最高位是符号位，正数是0，负数是1，所以id一般是正数，最高位是0
- * 41位时间截(毫秒级) 一般来说这个时间能够使用69年.
- * 10位的数据机器位，可以部署在1024个节点
- * 12位序列，毫秒内的计数，12位的计数顺序号支持每个节点每毫秒(同一机器，同一时间截)产生4096个ID序号
- * 加起来刚好64位，为一个Long型。
+- **1位符号位**: 固定为0（正数）
+- **41位时间戳**: 毫秒级时间戳，可使用69年
+- **10位机器标识**: 支持1024个节点部署
+- **12位序列号**: 同一毫秒内可生成4096个ID
 
-#### 进制转换
-通过上述发号器得到的Long类型的数据，转换为62进制，比如
+### 核心组件
 
+#### 控制器层
+- **MainController**: URL转换、二维码生成、密码验证
+- **RedirectController**: 短地址重定向
+- **IndexController**: 前端页面渲染
+
+#### 服务层
+- **UrlConvertService**: URL转换核心服务接口
+- **UrlConvertServiceImpl**: 服务实现，集成布隆过滤器和Redis存储
+
+#### 工具类
+- **SnowFlake**: Twitter雪花算法实现
+- **NumericConvertUtils**: 62进制转换工具
+- **QRcodeUtils**: 基于ZXing的二维码生成工具
+- **Validator**: URL格式校验工具
+- **BloomFilter**: 布隆过滤器实现
+
+#### 配置类
+- **SecurityProperties**: 密码验证配置
+- **CacheProperties**: Redis缓存前缀配置
+- **RedisConfiguration**: Redis连接配置
+
+### 处理流程
+
+1. **URL转换流程**:
+   ```
+   用户提交URL → 密码验证 → URL格式校验 → 布隆过滤器判重 
+   → 雪花算法生成ID → 62进制转换 → Redis存储映射 → 返回短地址
+   ```
+
+2. **短地址访问流程**:
+   ```
+   访问短地址 → 解析短码 → Redis查询原始URL → 302重定向
+   ```
+
+3. **二维码生成**:
+   ```
+   接收URL参数 → 使用ZXing生成二维码 → 返回图片流
+   ```
+
+### 数据存储
+
+- **Redis存储结构**: `{prefix}{shortCode} → originalUrl`
+- **布隆过滤器**: 快速判断URL是否已存在，减少Redis查询
+
+## API 接口
+
+### 1. URL转换
+```http
+POST /convert
+Content-Type: application/x-www-form-urlencoded
+
+url=https://example.com&password=admin123
 ```
-6628238651141500928
+
+### 2. 短地址反查
+```http
+POST /revert
+Content-Type: application/x-www-form-urlencoded
+
+shortUrl=7TDp0rS917i
 ```
 
-转换为
-
+### 3. 二维码生成
+```http
+GET /qrcode?url=https://example.com
 ```
-7TDp0rS917i
+
+### 4. 检查密码验证状态
+```http
+GET /password-enabled
 ```
 
-下面这个字符串就是需要的短地址。
+## 性能测试
 
-#### 重定向
+使用 JMH 进行性能基准测试，测试环境：
+- **CPU**: 2.2 GHz Intel Core i7
+- **内存**: 16 GB
+- **操作系统**: macOS
 
-通过 ` curl -i http://127.0.0.1:9527/7TDhjcamrAI ` 应用会匹配末端的字符串，去redis里面拿到url，然后通过状态码 302 重定向即可。
-
-#### 二维码生成
-使用 Google 的 [zxing](https://github.com/zxing/zxing) 做的二维码转换，详细代码可参考[这里](https://github.com/Alkaids/shortcut/blob/master/src/main/java/com/gravel/shortcut/utils/QRcodeUtils.java)。
-#### 性能测试
-
-使用 JMH 做性能基准测试，环境为 `CPU: 2.2 GHz Intel Core i7; Memory: 16 GB; OS: Mac OSX`。
+### 测试配置
+```java
+Options options = new OptionsBuilder()
+    .include(BenchmarkTest.class.getName() + ".*")
+    .warmupIterations(1)        // 预热轮数
+    .warmupTime(TimeValue.seconds(1))
+    .measurementIterations(5)   // 测试轮数
+    .measurementTime(TimeValue.seconds(5))
+    .forks(1)                   // 进程数
+    .threads(16)                // 线程数
+    .build();
 ```
- Options options = new OptionsBuilder().include(BenchmarkTest.class.getName()+".*")
-                .warmupIterations(1) // 预热
-                .warmupTime(TimeValue.seconds(1))
-                .measurementIterations(5)// 一共测试10轮
-                .measurementTime(TimeValue.seconds(5))// 每轮测试的时长
-                .forks(1)// 创建几个进程来测试
-                .threads(16)// 线程数
-                .build();
-```
-测试结果如下：
+
+### 测试结果
 ```
 Benchmark                      Mode  Cnt    Score    Error  Units
 BenchmarkTest.httprequest     thrpt    5  1948.349 ± 2028.032  ops/s
 BenchmarkTest.serviceRequest  thrpt    5  3945.100 ± 1185.980  ops/s
 ```
-1. `httprequest` 是通过 `okhttp` 构造 `post` 请求，直接请求本地前端控制方法。`qps` 大概 2000 左右。
-2. `serviceRequest` 是直接调用本地方法服务得到短地址，`qps` 大概是 `http` 测试的两倍，有 4000 左右，比较理想。
 
-进一步的优化空间可以关注一下进制转换部分，有不必要的基本类型转换。
+- **HTTP请求**: QPS约2000，通过OkHttp发送POST请求测试
+- **服务直调**: QPS约4000，直接调用服务方法测试
 
-## Thanks
+### 优化建议
+- 进制转换部分存在不必要的类型转换，可进一步优化
+- 可考虑使用连接池优化Redis连接
+- 布隆过滤器参数可根据实际数据量调优
 
-* [spring](https://spring.io/)
-* [redis](https://redis.io/)
-* [guava](https://github.com/google/guava)
-* [snowflake](https://developer.twitter.com/en/docs/basics/twitter-ids)
-* [JMH](http://openjdk.java.net/projects/code-tools/jmh/)
-* 以及知乎上[这篇帖子](https://www.zhihu.com/question/29270034/answer/46446911)的作者
+## 部署建议
 
+### Docker 部署
+```dockerfile
+FROM openjdk:8-jre-alpine
+COPY target/shortcut-0.0.1-SNAPSHOT.jar app.jar
+EXPOSE 9527
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
 
-## License
+### 生产环境配置
+```yaml
+# 生产环境建议配置
+server:
+  port: 80
+  
+spring:
+  redis:
+    host: redis-server
+    port: 6379
+    password: ${REDIS_PASSWORD}
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 10
+        min-idle: 5
 
-Code released under the [MIT License](https://github.com/Alkaids/shortcut/blob/master/LICENSE).
+common:
+  domain: https://your-domain.com
+
+security:
+  passwords: 
+    - ${CONVERT_PASSWORD}
+
+cache:
+  prefix: prod_shortcut_
+```
+
+## 致谢
+
+感谢以下开源项目和资源：
+
+* **[Spring Boot](https://spring.io/)** - 优秀的Java Web框架
+* **[Redis](https://redis.io/)** - 高性能内存数据库
+* **[Guava](https://github.com/google/guava)** - Google核心库
+* **[ZXing](https://github.com/zxing/zxing)** - 二维码生成库
+* **[JMH](http://openjdk.java.net/projects/code-tools/jmh/)** - Java性能基准测试工具
+* **[Snowflake Algorithm](https://developer.twitter.com/en/docs/basics/twitter-ids)** - Twitter雪花算法
+* **[知乎问答](https://www.zhihu.com/question/29270034/answer/46446911)** - 短地址生成方法参考
+
+## 许可证
+
+本项目基于 [MIT License](https://github.com/Alkaids/shortcut/blob/master/LICENSE) 开源。
+
+---
+
+## 更新日志
+
+### v2.0.0 (最新)
+- ✨ 新增密码保护功能
+- ✨ 新增短地址反向查询接口
+- ✨ 新增缓存前缀配置
+- 🎨 优化Web界面，增加加载指示器
+- 🔧 完善配置项和异常处理
+
+### v1.0.0
+- 🎉 基础短地址生成功能
+- 🎉 二维码生成功能
+- 🎉 布隆过滤器优化
+- 🎉 性能基准测试
