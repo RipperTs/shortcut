@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  redis:
+    image: registry.cn-hangzhou.aliyuncs.com/ripper/redis:7-alpine
+    container_name: shortcut-redis
+    restart: unless-stopped
+    command: redis-server --requirepass 123456
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - shortcut-network
+
+  shortcut:
+    image: registry.cn-hangzhou.aliyuncs.com/ripper/shortcut:latest
+    container_name: shortcut-app
+    restart: unless-stopped
+    ports:
+      - "9527:9527"
+    environment:
+      # Redis配置
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=123456
+      # 服务端口
+      - SERVER_PORT=9527
+      # 域名配置
+      - COMMON_DOMAIN=http://localhost:9527
+      # 缓存配置
+      - CACHE_PREFIX=shortcut_
+      # 安全配置（多个密码用逗号分隔）
+      - SECURITY_PASSWORDS[0]=admin123
+      - SECURITY_PASSWORDS[1]=convert2024
+    depends_on:
+      - redis
+    networks:
+      - shortcut-network
+
+networks:
+  shortcut-network:
+    driver: bridge
+
+volumes:
+  redis-data:
