@@ -295,6 +295,56 @@ function revert() {
     xhr.send(JSON.stringify({shortUrl: shortUrl}));
 }
 
+// 删除短地址
+function deleteShortUrl() {
+    var shortUrlInput = document.getElementById("shortUrl");
+    var shortUrl = shortUrlInput.value.trim();
+
+    if (!shortUrl) {
+        showError('请先还原短网址再删除');
+        return;
+    }
+
+    // 确认删除
+    if (!confirm('确定要删除这个短地址吗？删除后将无法访问！')) {
+        return;
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('post', '/delete', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onload = function () {
+        if (this.status === 200) {
+            try {
+                var res = JSON.parse(this.response);
+
+                if (res.code !== 200) {
+                    showError(res.message || '删除失败，请重试');
+                    return;
+                }
+
+                showSuccess('短地址已成功删除');
+                
+                // 清空输入框和隐藏结果
+                shortUrlInput.value = '';
+                hideResult('revertResult');
+
+            } catch (e) {
+                showError('服务器响应格式错误');
+            }
+        } else {
+            showError('网络请求失败，请检查网络连接');
+        }
+    };
+
+    xhr.onerror = function() {
+        showError('网络连接失败，请重试');
+    };
+
+    xhr.send(JSON.stringify({shortUrl: shortUrl}));
+}
+
 // 页面加载完成后检查密码配置
 document.addEventListener('DOMContentLoaded', function() {
     checkPasswordEnabled();

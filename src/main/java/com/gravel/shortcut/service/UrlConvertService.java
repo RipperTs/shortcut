@@ -25,4 +25,12 @@ public interface UrlConvertService {
      */
     String revertUrl(String shortUrl);
 
+    /**
+     * 删除短地址
+     *
+     * @param shortUrl
+     * @return
+     */
+    boolean deleteUrl(String shortUrl);
+
 }

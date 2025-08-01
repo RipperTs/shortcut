@@ -198,6 +198,18 @@ input[type="text"]:focus::placeholder, input[type="password"]:focus::placeholder
     box-shadow: 0 15px 40px rgba(6, 182, 212, 0.4);
 }
 
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+    color: white;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(239, 68, 68, 0.4);
+}
+
 .result-container {
     margin-top: 25px;
     padding: 24px;

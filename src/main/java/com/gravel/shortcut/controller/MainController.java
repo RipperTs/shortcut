@@ -66,6 +66,12 @@ public class MainController {
         return ResultGenerator.genSuccessResult(urlConvertService.revertUrl(request.getShortUrl()));
     }
 
+    @PostMapping("/delete")
+    public Result<Boolean> deleteUrl(@RequestBody RevertRequest request) {
+        boolean deleted = urlConvertService.deleteUrl(request.getShortUrl());
+        return ResultGenerator.genSuccessResult(deleted);
+    }
+
     /**
      * 检查是否启用了密码验证
      *
