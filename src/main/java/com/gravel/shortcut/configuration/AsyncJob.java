@@ -55,14 +55,19 @@ public class AsyncJob {
      * 将短网址和短域名异步添加到布隆过滤器中，提升相应速度
      * @param shortCut
      * @param url
+     * @param cachePrefix 缓存前缀
      */
     @Async
-    public void add2RedisAndBloomFilter(String shortCut, String url) {
+    public void add2RedisAndBloomFilter(String shortCut, String url, String cachePrefix) {
         log.info("正在执行异步任务，添加[shortCut]={},[url]={} 到布隆过滤器以及redis中....",shortCut,url);
+        // 生成带前缀的key
+        String shortCutKey = cachePrefix + shortCut;
+        String urlKey = cachePrefix + url;
+        
         // 放到redis里面
-        redisTemplate.opsForValue().set(shortCut, url);
+        redisTemplate.opsForValue().set(shortCutKey, url);
         // 添加到布隆过滤器
         bloomFilter.addByBloomFilter(url);
-        redisTemplate.opsForValue().set(url, shortCut);
+        redisTemplate.opsForValue().set(urlKey, shortCut);
     }
 }

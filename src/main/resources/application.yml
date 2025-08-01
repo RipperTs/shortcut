@@ -18,3 +18,8 @@ spring:
 # 配置域名，如果没有配，则默认是本地ip
 common:
    domain: 127.0.0.1:9527
+
+# 缓存配置
+cache:
+  # Redis缓存key前缀，默认为 shortcut_
+  prefix: shortcut_

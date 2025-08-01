@@ -3,6 +3,7 @@ package com.gravel.shortcut.service.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.gravel.shortcut.configuration.AsyncJob;
+import com.gravel.shortcut.configuration.CacheProperties;
 import com.gravel.shortcut.configuration.bloom.BloomFilter;
 import com.gravel.shortcut.service.UrlConvertService;
 import com.gravel.shortcut.utils.NumericConvertUtils;
@@ -13,6 +14,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Base64;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @ClassName UrlConvertServiceImpl
@@ -37,20 +41,37 @@ public class UrlConvertServiceImpl implements UrlConvertService {
     @Resource
     private AsyncJob asyncJob;
 
+    @Resource
+    private CacheProperties cacheProperties;
+
+    /**
+     * 生成带前缀的Redis key
+     *
+     * @param key 原始key
+     * @return 带前缀的key
+     */
+    private String buildCacheKey(String key) {
+        return cacheProperties.getPrefix() + key;
+    }
+
     /**
      * 得到短地址URL
      *
-     * @param url
+     * @param encodedUrl base64编码的URL
      * @return
      */
     @Override
-    public String convertUrl(String url) {
+    public String convertUrl(String encodedUrl) {
+        // 校验和解码base64
+        String url = decodeBase64Url(encodedUrl);
+        
         Preconditions.checkArgument(Validator.checkUrl(url), "[url]格式不合法！url={}", url);
         log.info("转换开始----->[url]={}", url);
         String shortCut;
+        String encodedUrlKey = buildCacheKey(encodedUrl);
         // 如果布隆过滤器能命中，则直接返回 对应的value
-        if (bloomFilter.includeByBloomFilter(url)) {
-            if (!Strings.isNullOrEmpty(shortCut = redisTemplate.opsForValue().get(url))) {
+        if (bloomFilter.includeByBloomFilter(encodedUrl)) {
+            if (!Strings.isNullOrEmpty(shortCut = redisTemplate.opsForValue().get(encodedUrlKey))) {
                 log.info("布隆过滤器命中----->[shortCut]={}", shortCut);
                 return shortCut;
             }
@@ -61,10 +82,53 @@ public class UrlConvertServiceImpl implements UrlConvertService {
         shortCut = NumericConvertUtils.convertTo(nextId, 62);
         log.info("转换成功----->[shortCut]={}", shortCut);
         // 将短网址和短域名异步添加到布隆过滤器中，提升响应速度
-        asyncJob.add2RedisAndBloomFilter(shortCut, url);
+        // 注意：这里存储的是base64编码的URL
+        asyncJob.add2RedisAndBloomFilter(shortCut, encodedUrl, cacheProperties.getPrefix());
         // 存在的话直接返回
 
         return shortCut;
+    }
+
+    /**
+     * 解码base64编码的URL
+     *
+     * @param encodedUrl base64编码的URL
+     * @return 解码后的URL
+     */
+    private String decodeBase64Url(String encodedUrl) {
+        try {
+            // 校验是否为有效的base64字符串
+            if (!isValidBase64(encodedUrl)) {
+                throw new IllegalArgumentException("URL参数必须为base64编码格式");
+            }
+            
+            // base64解码
+            byte[] decodedBytes = Base64.getDecoder().decode(encodedUrl);
+            String decodedStr = new String(decodedBytes, StandardCharsets.UTF_8);
+            
+            // URL解码
+            return URLDecoder.decode(decodedStr, StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("URL参数base64解码失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 校验字符串是否为有效的base64格式
+     *
+     * @param str 待校验字符串
+     * @return 是否为有效base64
+     */
+    private boolean isValidBase64(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        try {
+            Base64.getDecoder().decode(str);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     /**
@@ -77,8 +141,16 @@ public class UrlConvertServiceImpl implements UrlConvertService {
     public String revertUrl(String shortUrl) {
         log.info("还原开始----->[shortUrl]={}", shortUrl);
         String shortcut = shortUrl.substring(shortUrl.lastIndexOf("/") + 1);
-        String url = redisTemplate.opsForValue().get(shortcut);
-        log.info("还原成功----->[真实Url]={}", url);
-        return url;
+        String shortcutKey = buildCacheKey(shortcut);
+        String encodedUrl = redisTemplate.opsForValue().get(shortcutKey);
+        if (Strings.isNullOrEmpty(encodedUrl)) {
+            log.warn("未找到对应的短地址----->[shortcut]={}", shortcut);
+            return null;
+        }
+        
+        // 解码base64编码的URL
+        String decodedUrl = decodeBase64Url(encodedUrl);
+        log.info("还原成功----->[真实Url]={}", decodedUrl);
+        return decodedUrl;
     }
 }
