@@ -1,0 +1,69 @@
+# Maven
+target/
+!target/*.jar
+!target/**/lib/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE文件
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/
+
+# OS生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# 文档和媒体文件
+README.md
+CLAUDE.md
+LICENSE
+docs/
+*.md
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# 测试覆盖率
+*.exec
+jacoco.xml
+coverage/
+
+# Node.js (如果有前端构建)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
