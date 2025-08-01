@@ -159,13 +159,14 @@ cache:
 
 1. **URL转换流程**:
    ```
-   用户提交URL → 密码验证 → URL格式校验 → 布隆过滤器判重 
-   → 雪花算法生成ID → 62进制转换 → Redis存储映射 → 返回短地址
+   用户提交base64编码URL → 密码验证 → base64解码 → URL格式校验 
+   → 布隆过滤器判重 → 雪花算法生成ID → 62进制转换 
+   → Redis存储映射 → 返回短地址
    ```
 
 2. **短地址访问流程**:
    ```
-   访问短地址 → 解析短码 → Redis查询原始URL → 302重定向
+   访问短地址 → 解析短码 → Redis查询编码URL → base64解码 → 302重定向
    ```
 
 3. **二维码生成**:
@@ -175,8 +176,9 @@ cache:
 
 ### 数据存储
 
-- **Redis存储结构**: `{prefix}{shortCode} → originalUrl`
-- **布隆过滤器**: 快速判断URL是否已存在，减少Redis查询
+- **Redis存储结构**: `{prefix}{shortCode} → base64EncodedUrl`
+- **布隆过滤器**: 基于base64编码URL快速判断是否已存在，减少Redis查询
+- **编码机制**: 存储时使用base64编码，访问时自动解码
 
 ## API 接口
 
@@ -185,7 +187,17 @@ cache:
 POST /convert
 Content-Type: application/x-www-form-urlencoded
 
-url=https://example.com&password=admin123
+url=aHR0cHM6Ly9leGFtcGxlLmNvbQ==&password=admin123
+```
+
+**注意**: `url` 参数必须是经过 **base64编码** 的URL字符串。
+
+**编码示例**:
+```javascript
+// 原始URL: https://example.com
+// Base64编码后: aHR0cHM6Ly9leGFtcGxlLmNvbQ==
+const originalUrl = "https://example.com";
+const encodedUrl = btoa(encodeURIComponent(originalUrl));
 ```
 
 ### 2. 短地址反查
@@ -196,15 +208,21 @@ Content-Type: application/x-www-form-urlencoded
 shortUrl=7TDp0rS917i
 ```
 
+**返回**: 解码后的原始URL
+
 ### 3. 二维码生成
 ```http
 GET /qrcode?url=https://example.com
 ```
 
+**注意**: 二维码接口可以直接使用原始URL，无需base64编码。
+
 ### 4. 检查密码验证状态
 ```http
 GET /password-enabled
 ```
+
+**返回**: `{"code":200,"message":"SUCCESS","data":true}`
 
 ## 性能测试
 
