@@ -262,14 +262,99 @@ BenchmarkTest.serviceRequest  thrpt    5  3945.100 ± 1185.980  ops/s
 - 可考虑使用连接池优化Redis连接
 - 布隆过滤器参数可根据实际数据量调优
 
-## 部署建议
+## 部署说明
 
 ### Docker 部署
+
+#### 方式一：Docker Compose（推荐）
+
+**前提条件**：确保已构建好 jar 文件
+```bash
+mvn -Dmaven.test.skip=true clean package
+```
+
+**使用 docker-compose 一键部署**：
+```bash
+# 启动服务（包含应用和Redis）
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
+```
+
+**docker-compose.yml 配置**：
+```yaml
+version: '3.8'
+
+services:
+  redis:
+    image: registry.cn-hangzhou.aliyuncs.com/ripper/redis:7-alpine
+    container_name: shortcut-redis
+    restart: unless-stopped
+    command: redis-server --requirepass 123456
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - shortcut-network
+
+  shortcut:
+    image: registry.cn-hangzhou.aliyuncs.com/ripper/shortcut:latest
+    container_name: shortcut-app
+    restart: unless-stopped
+    ports:
+      - "9527:9527"
+    environment:
+      # Redis配置
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PASSWORD=123456
+      # 服务配置
+      - SERVER_PORT=9527
+      - COMMON_DOMAIN=http://localhost:9527
+      # 缓存配置
+      - CACHE_PREFIX=shortcut_
+      # 安全配置
+      - SECURITY_PASSWORDS[0]=admin123
+      - SECURITY_PASSWORDS[1]=convert2024
+    depends_on:
+      - redis
+    networks:
+      - shortcut-network
+
+networks:
+  shortcut-network:
+    driver: bridge
+```
+
+**环境变量配置说明**：
+- 所有 `application.yml` 中的配置都可通过环境变量覆盖
+- 转换规则：`spring.redis.host` → `SPRING_REDIS_HOST`
+- 数组配置：`security.passwords[0]` → `SECURITY_PASSWORDS[0]`
+
+#### 方式二：单独构建镜像
+
+**Dockerfile**：
 ```dockerfile
-FROM openjdk:8-jre-alpine
+FROM registry.cn-hangzhou.aliyuncs.com/ripper/openjdk:8-jdk-alpine
+WORKDIR /app
 COPY target/shortcut-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 9527
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+**构建和运行**：
+```bash
+# 构建镜像
+docker build -t shortcut:latest .
+
+# 运行容器（需要外部Redis）
+docker run -p 9527:9527 \
+  -e SPRING_REDIS_HOST=your-redis-host \
+  -e SPRING_REDIS_PASSWORD=your-redis-password \
+  shortcut:latest
 ```
 
 ### 生产环境配置

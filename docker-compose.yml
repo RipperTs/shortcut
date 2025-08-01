@@ -28,7 +28,7 @@ services:
       - COMMON_DOMAIN=http://localhost:9527
       # 缓存配置
       - CACHE_PREFIX=shortcut_
-      # 安全配置（多个密码用逗号分隔）
+      # 安全配置（支持多个密码）
       - SECURITY_PASSWORDS[0]=admin123
       - SECURITY_PASSWORDS[1]=convert2024
     depends_on:
