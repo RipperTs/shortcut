@@ -32,7 +32,7 @@
 
 ### 1. 克隆项目
 ```bash
-git clone https://github.com/Alkaids/shortcut.git
+git clone https://github.com/RipperTs/shortcut.git
 cd shortcut
 ```
 
