@@ -32,3 +32,6 @@ build/
 /.mvn/wrapper/
 /mvnw.cmd
 /mvnw
+application.yml
+CLAUDE.md
+.cursor/

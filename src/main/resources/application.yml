@@ -2,11 +2,10 @@ server:
   port: 9527
 spring:
   redis:
-    host: gravelHost
+    host: 10.6.80.35
     port: 6379
     # 密码 没有则可以不填
-    password:
-    # 如果使用的jedis 则将lettuce改成jedis即可
+    password: 123456
     lettuce:
       pool:
         # 最大活跃链接数 默认8
@@ -18,4 +17,4 @@ spring:
 
 # 配置域名，如果没有配，则默认是本地ip
 common:
-   domain: leebron.cc
+   domain: 127.0.0.1:9527
