@@ -154,33 +154,4 @@ public class UrlConvertServiceImpl implements UrlConvertService {
         return decodedUrl;
     }
 
-    /**
-     * 删除短地址
-     *
-     * @param shortUrl
-     * @return
-     */
-    @Override
-    public boolean deleteUrl(String shortUrl) {
-        log.info("删除开始----->[shortUrl]={}", shortUrl);
-        String shortcut = shortUrl.substring(shortUrl.lastIndexOf("/") + 1);
-        String shortcutKey = buildCacheKey(shortcut);
-        
-        // 先获取对应的编码URL用于删除反向映射
-        String encodedUrl = redisTemplate.opsForValue().get(shortcutKey);
-        if (Strings.isNullOrEmpty(encodedUrl)) {
-            log.warn("未找到对应的短地址----->[shortcut]={}", shortcut);
-            return false;
-        }
-        
-        // 删除短地址到原地址的映射
-        Boolean deleteResult = redisTemplate.delete(shortcutKey);
-        
-        // 删除原地址到短地址的映射
-        String encodedUrlKey = buildCacheKey(encodedUrl);
-        redisTemplate.delete(encodedUrlKey);
-        
-        log.info("删除成功----->[shortcut]={}", shortcut);
-        return deleteResult != null && deleteResult;
-    }
 }
