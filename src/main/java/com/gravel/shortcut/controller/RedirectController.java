@@ -31,10 +31,29 @@ public class RedirectController {
      * @return
      */
     @GetMapping("/*")
-    public RedirectView redirect(HttpServletRequest request, HttpServletResponse response) {
+    public Object redirect(HttpServletRequest request, HttpServletResponse response) {
         String shortcut = request.getServletPath().substring(1);
-        String url = urlConvertService.revertUrl(shortcut);
-        return new RedirectView(url);
+        
+        // 排除静态资源请求
+        if (shortcut.contains(".")) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return "error";
+        }
+        
+        try {
+            String url = urlConvertService.revertUrl(shortcut);
+            
+            // 如果找不到对应的URL，返回错误页面
+            if (url == null || url.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return "error";
+            }
+            
+            return new RedirectView(url);
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return "error";
+        }
     }
 
 }

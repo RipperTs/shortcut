@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../static/favicon.ico" th:href="@{/static/favicon.ico}"/>
+    <title>页面未找到 - 短地址转换工具</title>
+    <link rel="stylesheet" href="../static/css/global.css" th:href="@{/css/global.css}">
+    <style>
+        .error-container {
+            text-align: center;
+            padding: 60px 20px;
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .error-icon {
+            font-size: 120px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        .error-title {
+            font-size: 48px;
+            color: #fff;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .error-message {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn-home, .btn-back {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-home {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-back {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+        
+        .btn-back:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .error-title {
+                font-size: 36px;
+            }
+            
+            .error-message {
+                font-size: 16px;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 短网址转换工具</h1>
+        </div>
+        
+        <div class="error-container">
+            <div class="error-icon">🔍</div>
+            <h1 class="error-title">404</h1>
+            <p class="error-message">
+                抱歉，您访问的短网址不存在或已过期<br>
+                请检查网址是否正确，或返回首页重新生成短链接
+            </p>
+            
+            <div class="error-actions">
+                <a href="/" class="btn-home">
+                    🏠 返回首页
+                </a>
+                <button class="btn-back" onclick="history.back()">
+                    ← 返回上页
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
