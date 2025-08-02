@@ -18,6 +18,15 @@ public interface UrlConvertService {
     String convertUrl(String url);
 
     /**
+     * 得到短地址URL（带过期时间）
+     *
+     * @param url
+     * @param expireTime 过期时间（秒）
+     * @return
+     */
+    String convertUrl(String url, Long expireTime);
+
+    /**
      * 将短地址URL 转换为正常的地址
      *
      * @param shortUrl

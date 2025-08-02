@@ -70,4 +70,14 @@ public class AsyncJob {
         bloomFilter.addByBloomFilter(url);
         redisTemplate.opsForValue().set(urlKey, shortCut);
     }
+
+    /**
+     * 异步添加到布隆过滤器
+     * @param url
+     */
+    @Async
+    public void addToBloomFilter(String url) {
+        log.info("正在执行异步任务，添加[url]={} 到布隆过滤器中....", url);
+        bloomFilter.addByBloomFilter(url);
+    }
 }

@@ -53,7 +53,7 @@ public class MainController {
             }
         }
         
-        return ResultGenerator.genSuccessResult(urlConvertService.convertUrl(request.getUrl()));
+        return ResultGenerator.genSuccessResult(urlConvertService.convertUrl(request.getUrl(), request.getExpireTime()));
     }
 
     @GetMapping(value = "/qrcode", produces = MediaType.IMAGE_JPEG_VALUE)

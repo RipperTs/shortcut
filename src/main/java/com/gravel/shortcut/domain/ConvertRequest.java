@@ -11,6 +11,7 @@ public class ConvertRequest {
     
     private String url;
     private String password;
+    private Long expireTime;
     
     public ConvertRequest() {}
     
@@ -33,5 +34,13 @@ public class ConvertRequest {
     
     public void setPassword(String password) {
         this.password = password;
+    }
+    
+    public Long getExpireTime() {
+        return expireTime;
+    }
+    
+    public void setExpireTime(Long expireTime) {
+        this.expireTime = expireTime;
     }
 }

@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import java.util.Base64;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName UrlConvertServiceImpl
@@ -86,6 +87,55 @@ public class UrlConvertServiceImpl implements UrlConvertService {
         asyncJob.add2RedisAndBloomFilter(shortCut, encodedUrl, cacheProperties.getPrefix());
         // 存在的话直接返回
 
+        return shortCut;
+    }
+
+    /**
+     * 得到短地址URL（带过期时间）
+     *
+     * @param encodedUrl base64编码的URL
+     * @param expireTime 过期时间（秒）
+     * @return
+     */
+    @Override
+    public String convertUrl(String encodedUrl, Long expireTime) {
+        // 校验和解码base64
+        String url = decodeBase64Url(encodedUrl);
+        
+        Preconditions.checkArgument(Validator.checkUrl(url), "[url]格式不合法！url={}", url);
+        log.info("转换开始----->[url]={}, expireTime={}", url, expireTime);
+        String shortCut;
+        String encodedUrlKey = buildCacheKey(encodedUrl);
+        
+        // 如果没有设置过期时间，使用原有逻辑
+        if (expireTime == null || expireTime <= 0) {
+            return convertUrl(encodedUrl);
+        }
+        
+        // 如果布隆过滤器能命中，则直接返回对应的value
+        if (bloomFilter.includeByBloomFilter(encodedUrl)) {
+            if (!Strings.isNullOrEmpty(shortCut = redisTemplate.opsForValue().get(encodedUrlKey))) {
+                log.info("布隆过滤器命中----->[shortCut]={}", shortCut);
+                // 重新设置过期时间
+                redisTemplate.expire(buildCacheKey(shortCut), expireTime, TimeUnit.SECONDS);
+                return shortCut;
+            }
+        }
+        
+        // 直接生成一个新的短地址，并存入缓存
+        long nextId = idGenerator.nextId();
+        // 转换为62进制
+        shortCut = NumericConvertUtils.convertTo(nextId, 62);
+        log.info("转换成功----->[shortCut]={}", shortCut);
+        
+        // 存储映射关系，设置过期时间
+        String shortcutKey = buildCacheKey(shortCut);
+        redisTemplate.opsForValue().set(shortcutKey, encodedUrl, expireTime, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(encodedUrlKey, shortCut, expireTime, TimeUnit.SECONDS);
+        
+        // 将短网址和短域名异步添加到布隆过滤器中，提升响应速度
+        asyncJob.addToBloomFilter(encodedUrl);
+        
         return shortCut;
     }
 

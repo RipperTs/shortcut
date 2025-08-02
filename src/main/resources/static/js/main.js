@@ -171,6 +171,18 @@ function convert() {
         }
     }
 
+    // 添加过期时间参数（选填）
+    var expireTime = document.getElementById('expireTime').value.trim();
+    if (expireTime && expireTime > 0) {
+        requestData.expireTime = parseInt(expireTime);
+    }
+
+    if (requestData.expireTime < 300){
+        showError('过期时间不能小于5分钟');
+        hideLoading('convertLoading');
+        return;
+    }
+
     xhr.open('post', '/convert', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
 
@@ -314,9 +326,9 @@ document.getElementById('shortUrl').addEventListener('keypress', function(e) {
     }
 });
 
-// 为密码输入框添加回车键支持
+// 为密码和过期时间输入框添加回车键支持
 document.addEventListener('keypress', function(e) {
-    if (e.target.id === 'password' && e.key === 'Enter') {
+    if ((e.target.id === 'password' || e.target.id === 'expireTime') && e.key === 'Enter') {
         convert();
     }
 });
@@ -385,18 +397,3 @@ function showSuccess(message) {
         }
     }, 2000);
 }
-
-// 为结果链接添加点击复制功能
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('result-link')) {
-        e.preventDefault();
-        copyToClipboard(e.target.textContent);
-
-        // 如果是链接地址，也可以选择打开链接
-        setTimeout(function() {
-            if (confirm('是否要在新窗口中打开这个链接？')) {
-                window.open(e.target.href, '_blank');
-            }
-        }, 500);
-    }
-});

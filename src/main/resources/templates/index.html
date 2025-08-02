@@ -9,116 +9,128 @@
     <link rel="stylesheet" href="../static/css/global.css" th:href="@{/css/global.css}">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔗 短网址转换工具</h1>
-            <p>快速生成短链接，支持二维码分享</p>
+<div class="container">
+    <div class="header">
+        <h1>🔗 短网址转换工具</h1>
+        <p>快速生成短链接，支持二维码分享</p>
+    </div>
+
+    <div id="preurl" style="display: none" th:text="${domain}"></div>
+
+    <!-- Tab容器 -->
+    <div class="tabs-container">
+        <!-- Tab头部 -->
+        <div class="tab-header">
+            <button class="tab-button active" onclick="switchTab('convert')">
+                📎 长网址转短网址
+            </button>
+            <button class="tab-button" onclick="switchTab('revert')">
+                🔍 短网址还原
+            </button>
         </div>
 
-        <div id="preurl" style="display: none" th:text="${domain}"></div>
-
-        <!-- Tab容器 -->
-        <div class="tabs-container">
-            <!-- Tab头部 -->
-            <div class="tab-header">
-                <button class="tab-button active" onclick="switchTab('convert')">
-                    📎 长网址转短网址
-                </button>
-                <button class="tab-button" onclick="switchTab('revert')">
-                    🔍 短网址还原
-                </button>
-            </div>
-
-            <!-- 长网址转短网址 Tab -->
-            <div class="tab-content active" id="convertTab">
-                <div class="input-group">
-                    <div class="input-container">
-                        <input type="text" id="url" placeholder="请输入要转换的长网址..." />
-                    </div>
-                    <div class="input-container password-container" id="passwordContainer">
-                        <div class="password-wrapper">
-                            <svg class="password-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <circle cx="12" cy="16" r="1"></circle>
-                                <path d="m7 11 0-4a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                            <input type="password" id="password" placeholder="请输入转换密码..." />
-                        </div>
-                    </div>
-                    <div class="input-container">
-                        <button class="btn btn-primary" onclick="convert()">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            转换
-                        </button>
-                    </div>
-                    <div class="loading" id="convertLoading">
-                        <div class="loading-spinner"></div>
-                        正在转换中...
+        <!-- 长网址转短网址 Tab -->
+        <div class="tab-content active" id="convertTab">
+            <div class="input-group">
+                <div class="input-container">
+                    <input type="text" id="url" placeholder="请输入要转换的长网址..."/>
+                </div>
+                <div class="input-container expire-time-container" style="margin-top: 10px;width: 400px;">
+                    <input type="number" id="expireTime" placeholder="过期时间(秒) - 选填，如3600表示1小时后过期"
+                           min="0"/>
+                    <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12,6 12,12 16,14"></polyline>
+                    </svg>
+                </div>
+                <div class="input-container password-container" id="passwordContainer">
+                    <div class="password-wrapper">
+                        <svg class="password-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <circle cx="12" cy="16" r="1"></circle>
+                            <path d="m7 11 0-4a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" id="password" placeholder="请输入转换密码..."/>
                     </div>
                 </div>
-                
-                <div class="result-container" id="convertResult">
-                    <div style="margin-bottom: 16px; font-weight: 600; color: #374151;">✨ 短网址：</div>
-                    <div class="result-link" id="convertRepo">
-                        <span class="result-url" style="flex: 1;"></span>
-                        <button class="copy-btn" onclick="copyResult('convertRepo')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="m5 15-4-4 4-4m4 4h11"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="qr-container" id="convertImageDiv">
-                        <div style="margin-bottom: 12px; color: #6b7280; font-size: 14px; font-weight: 500;">📱 扫码访问</div>
-                        <img id="convertImage" src="" alt="二维码" style="border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);"/>
-                    </div>
+                <div class="input-container" style="margin-top: 10px;">
+                    <button class="btn btn-primary" onclick="convert()">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        转换
+                    </button>
+                </div>
+                <div class="loading" id="convertLoading">
+                    <div class="loading-spinner"></div>
+                    正在转换中...
                 </div>
             </div>
 
-            <!-- 短网址还原 Tab -->
-            <div class="tab-content" id="revertTab">
-                <div class="input-group">
-                    <div class="input-container">
-                        <input type="text" id="shortUrl" placeholder="请输入要还原的短网址..." />
-                        <button class="btn btn-secondary" onclick="revert()">
-                            <svg class="icon" viewBox="0 0 24 24">
-                                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                            </svg>
-                            还原
-                        </button>
-                    </div>
-                    <div class="loading" id="revertLoading">
-                        <div class="loading-spinner"></div>
-                        正在还原中...
-                    </div>
+            <div class="result-container" id="convertResult">
+                <div style="margin-bottom: 16px; font-weight: 600; color: #374151;">✨ 短网址：</div>
+                <div class="result-link" id="convertRepo">
+                    <span class="result-url" style="flex: 1;"></span>
+                    <button class="copy-btn" onclick="copyResult('convertRepo')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="m5 15-4-4 4-4m4 4h11"></path>
+                        </svg>
+                    </button>
                 </div>
-                
-                <div class="result-container" id="revertResult">
-                    <div style="margin-bottom: 16px; font-weight: 600; color: #374151;">🔓 原始网址：</div>
-                    <div class="result-link" id="revertRepo">
-                        <span class="result-url" style="flex: 1;"></span>
-                        <button class="copy-btn" onclick="copyResult('revertRepo')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                <path d="m5 15-4-4 4-4m4 4h11"></path>
-                            </svg>
-                        </button>
+                <div class="qr-container" id="convertImageDiv">
+                    <div style="margin-bottom: 12px; color: #6b7280; font-size: 14px; font-weight: 500;">📱 扫码访问
                     </div>
-                    <div class="qr-container" id="revertImageDiv">
-                        <div style="margin-bottom: 12px; color: #6b7280; font-size: 14px; font-weight: 500;">📱 扫码访问</div>
-                        <img id="revertImage" src="" alt="二维码" style="border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);"/>
-                    </div>
+                    <img id="convertImage" src="" alt="二维码"
+                         style="border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);"/>
                 </div>
             </div>
         </div>
 
-        <div class="footer">
-            <p>© 2025 短网址转换工具 - 简单、快速、安全</p>
+        <!-- 短网址还原 Tab -->
+        <div class="tab-content" id="revertTab">
+            <div class="input-group">
+                <div class="input-container">
+                    <input type="text" id="shortUrl" placeholder="请输入要还原的短网址..."/>
+                    <button class="btn btn-secondary" onclick="revert()">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        还原
+                    </button>
+                </div>
+                <div class="loading" id="revertLoading">
+                    <div class="loading-spinner"></div>
+                    正在还原中...
+                </div>
+            </div>
+
+            <div class="result-container" id="revertResult">
+                <div style="margin-bottom: 16px; font-weight: 600; color: #374151;">🔓 原始网址：</div>
+                <div class="result-link" id="revertRepo">
+                    <span class="result-url" style="flex: 1;"></span>
+                    <button class="copy-btn" onclick="copyResult('revertRepo')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="m5 15-4-4 4-4m4 4h11"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="qr-container" id="revertImageDiv">
+                    <div style="margin-bottom: 12px; color: #6b7280; font-size: 14px; font-weight: 500;">📱 扫码访问
+                    </div>
+                    <img id="revertImage" src="" alt="二维码"
+                         style="border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);"/>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script src="../static/js/main.js" th:src="@{/js/main.js}"></script>
+    <div class="footer">
+        <p>© 2025 短网址转换工具 - 简单、快速、安全</p>
+    </div>
+</div>
+
+<script src="../static/js/main.js" th:src="@{/js/main.js}"></script>
 </body>
 </html>
