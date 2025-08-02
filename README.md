@@ -2,7 +2,7 @@
   <br>
   Shortcut
   <h4 align="center">
-基于 Spring Boot 的高性能短地址生成服务，使用 Twitter 雪花算法生成唯一短地址，支持密码保护和二维码生成。
+基于 Spring Boot 的高性能短地址生成服务，使用 Twitter 雪花算法生成唯一短地址，支持密码保护、二维码生成和过期时间设置。
   </h4>
   <h5 align="center">
 <a href="#环境要求">环境要求</a>&nbsp;&nbsp;
@@ -81,12 +81,12 @@ mvn spring-boot:run
 - 🛡️ **异常处理**: 全局异常拦截和处理
 - ✔️ **URL校验**: 完善的URL格式验证
 - 🗂️ **缓存配置**: 支持自定义Redis缓存前缀
+- ⏰ **过期时间设置**: 支持为短地址设置自定义过期时间，使用Redis TTL机制自动清理
 
 ### 🚧 计划功能
 - [ ] 令牌桶限流
 - [ ] URL访问统计
 - [ ] 批量URL转换
-- [ ] 过期时间设置
 
 ## 配置说明
 
@@ -194,11 +194,15 @@ Content-Type: application/json
 
 {
   "url": "aHR0cHM6Ly9leGFtcGxlLmNvbQ==",
-  "password": "admin123"
+  "password": "admin123",
+  "expireTime": 3600
 }
 ```
 
-**注意**: `url` 参数必须是经过 **base64编码** 的URL字符串。
+**参数说明**:
+- `url`: 必填，经过 **base64编码** 的URL字符串
+- `password`: 选填，转换密码（如果系统启用了密码保护）
+- `expireTime`: 选填，过期时间（秒），最小值10秒
 
 **编码示例**:
 ```javascript
@@ -406,7 +410,14 @@ cache:
 
 ## 更新日志
 
-### v2.1.0 (最新)
+### v2.2.0 (最新)
+- ⏰ **新增过期时间功能**: 支持为短地址设置自定义过期时间
+- 🔧 **API增强**: `/convert` 接口新增 `expireTime` 参数
+- 🎨 **UI优化**: 前端页面增加过期时间输入框，支持时钟图标和友好提示
+- 🛡️ **逻辑优化**: 修复布隆过滤器与过期key的处理逻辑
+- ⚡ **性能提升**: 过期数据使用Redis TTL机制自动清理
+
+### v2.1.0
 - ✨ 新增CORS跨域支持
 - ✨ 新增自定义404错误页面
 - 🔧 重构API接口，统一使用JSON请求体
