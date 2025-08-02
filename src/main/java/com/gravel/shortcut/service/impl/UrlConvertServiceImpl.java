@@ -70,11 +70,14 @@ public class UrlConvertServiceImpl implements UrlConvertService {
         log.info("转换开始----->[url]={}", url);
         String shortCut;
         String encodedUrlKey = buildCacheKey(encodedUrl);
-        // 如果布隆过滤器能命中，则直接返回 对应的value
+        // 如果布隆过滤器能命中，则检查Redis中是否还存在对应的value
         if (bloomFilter.includeByBloomFilter(encodedUrl)) {
-            if (!Strings.isNullOrEmpty(shortCut = redisTemplate.opsForValue().get(encodedUrlKey))) {
-                log.info("布隆过滤器命中----->[shortCut]={}", shortCut);
+            shortCut = redisTemplate.opsForValue().get(encodedUrlKey);
+            if (!Strings.isNullOrEmpty(shortCut)) {
+                log.info("布隆过滤器命中，短链接仍有效----->[shortCut]={}", shortCut);
                 return shortCut;
+            } else {
+                log.info("布隆过滤器命中但Redis中key已过期，重新生成短链接");
             }
         }
         // 直接生成一个新的短地址，并存入缓存
@@ -112,13 +115,18 @@ public class UrlConvertServiceImpl implements UrlConvertService {
             return convertUrl(encodedUrl);
         }
         
-        // 如果布隆过滤器能命中，则直接返回对应的value
+        // 如果布隆过滤器能命中，则检查Redis中是否还存在对应的value
         if (bloomFilter.includeByBloomFilter(encodedUrl)) {
-            if (!Strings.isNullOrEmpty(shortCut = redisTemplate.opsForValue().get(encodedUrlKey))) {
-                log.info("布隆过滤器命中----->[shortCut]={}", shortCut);
+            shortCut = redisTemplate.opsForValue().get(encodedUrlKey);
+            if (!Strings.isNullOrEmpty(shortCut)) {
+                log.info("布隆过滤器命中，短链接仍有效----->[shortCut]={}", shortCut);
                 // 重新设置过期时间
-                redisTemplate.expire(buildCacheKey(shortCut), expireTime, TimeUnit.SECONDS);
+                String shortcutKey = buildCacheKey(shortCut);
+                redisTemplate.expire(shortcutKey, expireTime, TimeUnit.SECONDS);
+                redisTemplate.expire(encodedUrlKey, expireTime, TimeUnit.SECONDS);
                 return shortCut;
+            } else {
+                log.info("布隆过滤器命中但Redis中key已过期，重新生成短链接");
             }
         }
         

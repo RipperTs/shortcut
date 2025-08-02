@@ -177,8 +177,8 @@ function convert() {
         requestData.expireTime = parseInt(expireTime);
     }
 
-    if (requestData.expireTime < 300){
-        showError('过期时间不能小于5分钟');
+    if (requestData.expireTime && requestData.expireTime < 10){
+        showError('过期时间不能小于10秒');
         hideLoading('convertLoading');
         return;
     }
