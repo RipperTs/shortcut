@@ -45,15 +45,12 @@ body::before {
 }
 
 .header h1 {
-    color: white;
+    color: #ffffff;
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
     font-size: 2.8rem;
     font-weight: 700;
     margin-bottom: 15px;
     text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    background: linear-gradient(45deg, #ffffff, #f1f5f9);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
     position: relative;
 }
 
@@ -65,7 +62,7 @@ body::before {
     transform: translateX(-50%);
     width: 60px;
     height: 3px;
-    background: linear-gradient(90deg, #ffffff, #f1f5f9);
+    background: #ffffff;
     border-radius: 2px;
 }
 
